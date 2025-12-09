@@ -16,7 +16,7 @@ import Data.Functor.Identity
 
 
 data Free f a = Pure a
-              | Free (f (Free f a)) 
+              | Free (f (Free f a))
 
 instance Functor f => Functor (Free f) where
   fmap f (Pure a) = Pure (f a)

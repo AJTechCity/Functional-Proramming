@@ -19,10 +19,12 @@ import Data.List
 {- Question 1 -}
 
 toRose :: Free [] a -> Rose a 
-toRose = undefined
+toRose (Pure x) = Lf x
+toRose (Free xs) = Br[toRose a | a<-xs]
 
 fromRose :: Rose a -> Free [] a
-fromRose = undefined
+fromRose (Lf a) = Pure a
+fromRose (Br xs) = Free [fromRose a | a<- xs]
 
 {- Question 2 -}
 
