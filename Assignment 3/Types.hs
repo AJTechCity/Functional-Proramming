@@ -42,6 +42,7 @@ unfree (Free mfm) = mfm >>= unfree
 
 data Rose a = Lf a
             | Br [ Rose a ] 
+            deriving (Show, Eq)
 
 
 {- Question 2 -}

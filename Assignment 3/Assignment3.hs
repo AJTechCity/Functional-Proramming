@@ -20,16 +20,17 @@ import Data.List
 
 toRose :: Free [] a -> Rose a 
 toRose (Pure x) = Lf x
-toRose (Free xs) = Br[toRose a | a<-xs]
+toRose (Free xs) = Br (map toRose xs)
 
 fromRose :: Rose a -> Free [] a
 fromRose (Lf a) = Pure a
-fromRose (Br xs) = Free [fromRose a | a<- xs]
+fromRose (Br xs) = Free (map fromRose xs)
 
 {- Question 2 -}
 
 trace :: FreeState s a -> State ([s],s) a
-trace = undefined
+trace (Pure x) = x
+trace (Free ffa) = undefined
 
 {- Question 3 -}
 
