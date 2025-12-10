@@ -64,17 +64,21 @@ schedule ts = runScheduler (map (\thread -> (thread,0)) ts)
           runScheduler (otherThreads ++ [(currentThread, currentSleep - 1)])
       | otherwise =
           case currentThread of
+
             Pure () ->
               runScheduler otherThreads
+
             Free (FLeft stateCommand) -> do
               oldState <- get
               let (nextThreadAfterState, newInnerState) = runState stateCommand oldState
               put newInnerState
               runScheduler ((nextThreadAfterState,0) : decreaseSleepCounters otherThreads)
+              
             Free (FRight (Sleep sleepAmount nextThread)) ->
               runScheduler (otherThreads ++ [(nextThread, sleepAmount)])
+
     decreaseSleepCounters :: [(SleepState s (), Int)] -> [(SleepState s (), Int)]
     decreaseSleepCounters [] = []
     decreaseSleepCounters ((thread, counter):rest)
       | counter > 0 = (thread, counter - 1) : decreaseSleepCounters rest
-      | otherwise   = (thread, 0)          : decreaseSleepCounters rest
+      | otherwise   = (thread, 0) : decreaseSleepCounters rest
