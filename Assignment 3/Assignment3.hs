@@ -43,7 +43,6 @@ roundRobin [] = return ()
 roundRobin (x:xs) = 
     case x of
         Pure () -> 
-            -- Thread finished
             roundRobin xs
         Free (FLeft st) -> do
             s <- get
@@ -56,4 +55,26 @@ roundRobin (x:xs) =
 {- Question 4 -}
 
 schedule :: [SleepState s ()] -> State s ()
-schedule = undefined
+schedule ts = runScheduler (map (\thread -> (thread,0)) ts)
+  where
+    runScheduler :: [(SleepState s (), Int)] -> State s ()
+    runScheduler [] = return ()
+    runScheduler ((currentThread, currentSleep) : otherThreads)
+      | currentSleep > 0 =
+          runScheduler (otherThreads ++ [(currentThread, currentSleep - 1)])
+      | otherwise =
+          case currentThread of
+            Pure () ->
+              runScheduler otherThreads
+            Free (FLeft stateCommand) -> do
+              oldState <- get
+              let (nextThreadAfterState, newInnerState) = runState stateCommand oldState
+              put newInnerState
+              runScheduler ((nextThreadAfterState,0) : decreaseSleepCounters otherThreads)
+            Free (FRight (Sleep sleepAmount nextThread)) ->
+              runScheduler (otherThreads ++ [(nextThread, sleepAmount)])
+    decreaseSleepCounters :: [(SleepState s (), Int)] -> [(SleepState s (), Int)]
+    decreaseSleepCounters [] = []
+    decreaseSleepCounters ((thread, counter):rest)
+      | counter > 0 = (thread, counter - 1) : decreaseSleepCounters rest
+      | otherwise   = (thread, 0)          : decreaseSleepCounters rest
