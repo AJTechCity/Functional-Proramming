@@ -97,6 +97,17 @@ yieldEx = do
   putY $ i + 1
   pure ()
 
+charWriter :: Char -> YieldState String ()
+charWriter c = do s <- getY
+                  if (length s > 10) then pure () else
+                    do putY (c:s)
+                       yield
+                       charWriter c 
+
+yieldExample :: [YieldState String ()]
+yieldExample = [charWriter 'a', charWriter 'b', charWriter 'c'] 
+
+
 
 {- Question 4 -}
 

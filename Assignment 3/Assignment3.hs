@@ -29,13 +29,29 @@ fromRose (Br xs) = Free (map fromRose xs)
 {- Question 2 -}
 
 trace :: FreeState s a -> State ([s],s) a
-trace (Pure x) = x
-trace (Free ffa) = undefined
+trace (Pure x) = return x
+trace (Free ffa) = do
+    (hist, state) <- get
+    let (free2, state2) = runState ffa state
+    put(state2 : hist, state2)
+    trace free2
 
 {- Question 3 -}
 
 roundRobin :: [YieldState s ()] -> State s ()
-roundRobin = undefined
+roundRobin [] = return ()
+roundRobin (x:xs) = 
+    case x of
+        Pure () -> 
+            -- Thread finished
+            roundRobin xs
+        Free (FLeft st) -> do
+            s <- get
+            let (x', s') = runState st s
+            put s'
+            roundRobin (x': xs)
+        Free (FRight (Yield x')) -> 
+            roundRobin (xs ++ [x'])
 
 {- Question 4 -}
 
