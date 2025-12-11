@@ -25,18 +25,34 @@ import Data.List
 -- QUESTION 1
 ---------------------------------------------------------------------------------
 
+
 isNBranching :: Int -> Rose a -> Bool
-isNBranching n t = undefined
+isNBranching n (Leaf a) = True
+isNBranching n (Branch []) = n == 0
+isNBranching n (Branch (x:xs)) = length (x:xs) == n && all (isNBranching n) (x:xs)
 
 prune :: Int -> Rose a -> Rose a
-prune n t = undefined
+prune n (Leaf a) = Leaf a
+prune n (Branch []) = Branch []
+prune n (Branch children) = Branch ( map (prune n) (take n children) )
+
 
 ---------------------------------------------------------------------------------
 -- QUESTION 2
 ---------------------------------------------------------------------------------
 
 applyNTimes :: Monad m => m a -> (a -> m a) -> Int -> m [a]
-applyNTimes mx mf n = undefined
+applyNTimes mx mf 0 = return []
+applyNTimes mx mf n = do
+    x0 <- mx
+    go n x0
+    where
+        go 0 x = return [x]
+        go k x = do
+            x' <- mf x
+            xs <- go (k-1) x'
+            return (x:xs)
+
 
 ---------------------------------------------------------------------------------
 -- QUESTION 3
