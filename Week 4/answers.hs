@@ -102,3 +102,16 @@ add m n f x = m f (n f x)
 --Exercise 1 - Using comprehensions + NO recrusion
 concat1 :: [[a]] -> [a]
 concat1 xss = [x |xs <- xss, x<-xs]
+
+--Exercise 2 - Define concat using recursion
+concat2 :: [[a]] -> [a]
+concat2 [] = []
+concat2 (xs:xss) = xs ++ concat2 xss
+
+--Exercise 3 - Define concat using foldr + No Recursion or list comprehension
+concat3 :: [[a]] -> [a]
+concat3 = foldr (\xs acc -> xs ++ acc) []
+
+--Exercise 4 - Define concat using foldr + No Recursion or list comprehension
+concat4 :: [[a]] -> [a]
+concat4 = foldl (\acc xs -> acc ++ xs) []
