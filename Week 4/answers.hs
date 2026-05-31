@@ -100,5 +100,5 @@ add m n f x = m f (n f x)
 
 --Define Prelude `Concat` in four different ways
 --Exercise 1 - Using comprehensions + NO recrusion
-concat1 :: [[a]] -> [[a]]
-concat1 xss = [[x | x<-xs] | xs <- xss]
+concat1 :: [[a]] -> [a]
+concat1 xss = [x |xs <- xss, x<-xs]
