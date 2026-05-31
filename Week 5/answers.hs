@@ -22,19 +22,26 @@ type Presses = Int
 type Text = String
 
 --Exercise 1a - takes a list of buttons and the number of times to press them and gives back the corresponding text
-buttonChars :: Button -> [Char]
-buttonChars '2' = ['a', 'b', 'c', '2']
-buttonChars '3' = ['d', 'e', 'f', '3']
-buttonChars '4' = ['g', 'h', 'i', '4']
-buttonChars '5' = ['j', 'k', 'l', '5']
-buttonChars '6' = ['m', 'n' , 'o', '6']
-buttonChars '7' = ['p', 'q', 'r', 's', '7']
-buttonChars '8' = ['t', 'u', 'v', '8']
-buttonChars '9' = ['w', 'x', 'y', 'z', '9']
-buttonChars '0' = [' ', '0']
-buttonChars '1' = ['1']
-buttonChars '#' = ['.', ',']
-buttonChars _ = []
+buttons :: [(Button, String)]
+buttons =
+    [ ('1',"1")
+    , ('2',"abc2")
+    , ('3',"def3")
+    , ('4',"ghi4")
+    , ('5',"jkl5")
+    , ('6',"mno6")
+    , ('7',"pqrs7")
+    , ('8',"tuv8")
+    , ('9',"wxyz9")
+    , ('0'," 0")
+    , ('#',".,")
+    ]
+
+buttonChars :: Button -> String
+buttonChars b = 
+    case lookup b buttons of
+        Just s -> s
+        Nothing -> ""
 
 pressesToChar :: (Button, Presses) -> Char
 pressesToChar (btn, 0) = btn
@@ -54,3 +61,69 @@ phoneToString ((btn, presses):y:xs) =
         char = if isCap then toUpper (pressesToChar y) else pressesToChar (btn, presses)
     in
         [pressesToChar (btn, presses)] ++ (if isCap then phoneToString xs else phoneToString ([y]++xs))
+
+--Exercise 1b - taking a string to a list of buttons and the number of times that they need to be pressed
+
+charToPresses :: Char -> [(Button, Presses)]
+charToPresses x = undefined
+
+stringToPhone :: Text -> [(Button, Presses)]
+stringToPhone = undefined
+
+
+--Using Maybe Types
+--Exercise 1 - Rewrite head and tail so they use Maybe
+headMaybe :: [a] -> Maybe a
+headMaybe [] = Nothing
+headMaybe (x:xs) = Just x
+
+tailMaybe :: [a] -> Maybe [a]
+tailMaybe [] = Nothing
+tailMaybe (x:xs) = Just xs
+
+--Exercise 2 - Rewrite take to use Maybe to indicate when index is longer than list
+takeMaybe :: Int -> [a] -> Maybe [a]
+takeMaybe 0 _ = Just []
+takeMaybe _ [] = Nothing
+takeMaybe num (x:xs) = case takeMaybe (num-1) xs of
+    Nothing -> Nothing
+    Just ys -> Just (x:ys)
+
+--Exercise 3 - Rewrite zip from prelude using Either - If 2 arguments are same length, put them in tuple, otherwise return the shortest one as String
+zipEither :: [a] -> [b] -> Either String [(a,b)]
+zipEither [] [] = Right []
+zipEither [] _ = Left "1st Argument Smaller"
+zipEither _ [] = Left "2nd Argument Smaller"
+zipEither (x:xs) (y:ys) = case zipEither xs ys of
+    Left err -> Left err
+    Right pairs -> Right ((x,y) : pairs)
+
+--Type Retractions
+--Exercise 1 - 
+data WeekDay = Mon | Tue | Wed | Thu | Fri | Sat | Sun deriving (Show, Read, Eq, Ord, Enum)
+data WorkingDay = MonW | TueW | WedW | ThuW | FriW deriving (Show, Eq)
+
+toWeekDay :: WorkingDay -> WeekDay
+toWeekDay MonW = Mon
+toWeekDay TueW = Tue
+toWeekDay WedW = Wed
+toWeekDay ThuW = Thu
+toWeekDay FriW = Fri
+
+toWorkingDay :: WeekDay -> WorkingDay
+toWorkingDay Mon = MonW
+toWorkingDay Tue = TueW
+toWorkingDay Wed = WedW
+toWorkingDay Thu = ThuW
+toWorkingDay Fri = FriW
+toWorkingDay Sat = error "No Working Day for Sat"
+toWorkingDay Sun = error "No Working Day for Sun"
+
+--Exercise 2 - Show type Maybe a is retract of the type [a]
+toList :: Maybe a -> [a]
+toList (Just a) = [a]
+toList (Nothing) = []
+
+toMaybe :: [a] -> Maybe a
+toMaybe [] = Nothing
+toMaybe (x:xs) = Just x
