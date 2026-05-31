@@ -127,3 +127,58 @@ toList (Nothing) = []
 toMaybe :: [a] -> Maybe a
 toMaybe [] = Nothing
 toMaybe (x:xs) = Just x
+
+--Trees
+--Exercise 1 - Define a type of binary tress which carries an element of type a at each leaf, and an element of type b at each node
+data BinLN a b = Leaf a | Node b (BinLN a b) (BinLN a b)
+
+--Exercise 2 - Using above datatype, write function which collects the list of elements decorating the leaves of the given tree
+leaves :: BinLN a b -> [a]
+leaves (Leaf x) = [x]
+leaves (Node _ l1 l2) = leaves l1 ++ leaves l2
+
+--Exercise 3 - Implement new version of binary trees which carries data only at the leaves
+data BinL a = Lf a | Nd (BinL a) (BinL a)
+
+--Exercise 4 = Using above datatype, and suppose type `a` has instance of `Show`, implement function to render the tree as collection of parentheses enclosing elements at the leaves
+showBin :: Show a => BinL a -> String
+showBin (Lf x) = "(" ++ show x ++ ")"
+showBin (Nd x y) = "(" ++ showBin x ++ showBin y ++ ")"
+
+--Exercise 5 (Hard) - Write function which, given a well parenthesized string of numbers, produces the corresponding tree. - May want to use `Maybe` and `Either` to report when string is ill-formed. - Lookup `read` function to convert strings to integer types
+
+-- readNumber :: String -> Maybe (Int, String)
+-- readNumber xs = 
+--     let (digits, rest) = span isDigit xs
+--         out = read digits :: Int
+--     in
+--         (out !! 0, rest)
+
+-- parseBin :: String -> Maybe (BinL Int, String)
+-- parseBin [] = Nothing
+-- parseBin ('(':xs)
+--     | head xs == '(' = parseBin xs
+--     | isDigit (head xs) = readNumber xs 
+--     | otherwise = Nothing
+
+-- stringToBin :: Show a => [Char] -> Maybe (BinL a)
+-- stringToBin [] = Nothing
+-- stringToBin [x] = Nothing
+
+--Exercise 6 - Define right grafting operation (//) such that r//s inserts s as the rightmost subtree of r
+data BT a = BLeaf a | BNode (BT a) (BT a) deriving Show
+(//) :: BT a -> BT a -> BT a
+(//) (BLeaf t) s = s
+(//) (BNode l r) s = BNode l (r//s)
+
+--Exercise 7 - Define the left grafting operation (\\) such that l//s inserts s as the leftmost subtree of l
+(\\) :: BT a -> BT a -> BT a
+(\\) (BLeaf t) s = s
+(\\) (BNode l r) s = BNode (l\\s) r
+
+--Exercise 8 - 
+leafIndiciesHelper :: Int -> BT a -> (BT (Int, Int), Int)
+leafIndiciesHelper n (BLeaf _) = (BLeaf (n, n), n+1)
+
+leafIndicies :: BT a -> BT (Int, Int)
+leafIndicies (BLeaf _) = undefined
