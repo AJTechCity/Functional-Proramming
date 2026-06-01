@@ -25,51 +25,81 @@ import Data.List
 -- QUESTION 1
 ---------------------------------------------------------------------------------
 
-
 isNBranching :: Int -> Rose a -> Bool
-isNBranching n (Leaf a) = True
-isNBranching n (Branch []) = n == 0
-isNBranching n (Branch (x:xs)) = length (x:xs) == n && all (isNBranching n) (x:xs)
+isNBranching n (Leaf l) = True
+isNBranching n (Branch children) = (length children == n) && and [isNBranching n child | child <- children]
 
 prune :: Int -> Rose a -> Rose a
-prune n (Leaf a) = Leaf a
-prune n (Branch []) = Branch []
-prune n (Branch children) = Branch ( map (prune n) (take n children) )
-
+prune _ (Leaf l) = Leaf l
+prune n (Branch xs) = Branch [prune n x | x<-(take n xs)]
 
 ---------------------------------------------------------------------------------
 -- QUESTION 2
 ---------------------------------------------------------------------------------
 
 applyNTimes :: Monad m => m a -> (a -> m a) -> Int -> m [a]
-applyNTimes mx mf 0 = return []
+applyNTimes mx _ 0 = mx >>= (\x -> pure [x])
 applyNTimes mx mf n = do
-    x0 <- mx
-    go n x0
-    where
-        go 0 x = return [x]
-        go k x = do
-            x' <- mf x
-            xs <- go (k-1) x'
-            return (x:xs)
-
+    x <- mx
+    xs <- applyNTimes (mf x) mf (n-1)
+    pure (x:xs)
 
 ---------------------------------------------------------------------------------
 -- QUESTION 3
 ---------------------------------------------------------------------------------
 
 gameOver :: NimGame Bool
-gameOver = undefined 
+gameOver = do
+    (x,y) <- get
+    pure (x==0&&y==0)
+
 
 takeTokens :: Int -> Heap -> NimGame ()
-takeTokens n h = undefined
+takeTokens n (First) = do
+    (x,y) <- get
+    put ((max 0 (x-n)), y)
+takeTokens n (Second) = do
+    (x,y) <- get
+    put (x, (max 0 (y-n)))
 
 ---------------------------------------------------------------------------------
 -- QUESTION 4
 ---------------------------------------------------------------------------------
 
+checkRows :: [[Int]] -> Int -> Bool
+-- checkRows xss exp = 
+--     let totals = [sum xs | xs <- xss]
+--         first_total = totals !! 0
+--         outcome = foldr (\xs acc -> if xs==acc then acc else -1) first_total totals
+--     in
+--         outcome == exp
+
+checkCols :: [[Int]] ->Int -> Bool
+checkCols xss exp = checkRows (transpose xss) exp
+
+checkLeadDiagonal :: [[Int]] -> Int -> Bool
+checkLeadDiagonal xss exp = sum [(xss!!i!!i) | i<-[0..(length xss-1)]] == exp
+
+checkTrailDiagonal :: [[Int]] -> Int -> Bool
+checkTrailDiagonal xss exp = sum [xss!!(i-1)!!(length xss - i) | i<-[1..(length xss)]] == exp
+
 isMagicSquare :: [[Int]] -> Bool
-isMagicSquare = undefined
+-- isMagicSquare xss = 
+--     let exp = sum (xss!!0)
+--     in
+--         checkRows xss exp && checkCols xss exp && checkLeadDiagonal xss exp && checkTrailDiagonal xss exp
+
+--Easier Solution
+checkRows xss exp = all (== exp) [sum xs | xs <- xss]
+
+isMagicSquare xss = 
+    let rows = map sum xss
+        cols = map sum (transpose xss)
+        leadDiag = sum (zipWith (!!) xss [0..(length xss-1)])
+        trailDiag = sum (zipWith (!!) xss (reverse [0..(length xss-1)]))
+        exp = sum (xss!!0)
+    in 
+        all (==exp) (rows++cols++[leadDiag, trailDiag])
 
 ---------------------------------------------------------------------------------
 -- QUESTION 5
