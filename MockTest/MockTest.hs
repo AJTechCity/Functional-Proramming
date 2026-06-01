@@ -106,4 +106,11 @@ isMagicSquare xss =
 ---------------------------------------------------------------------------------
 
 circuit :: Expr -> Circuit
-circuit exp = undefined
+circuit (Var v) = Input v
+circuit (Not e) = Nand (circuit e) (circuit e)
+circuit (And e1 e2) = 
+    let h = Nand (circuit e1) (circuit e2)
+    in
+        Nand h h
+circuit (Or e1 e2) = circuit( Not (And (Not e1) (Not e2)))
+circuit (Implies e1 e2) = circuit (Or (Not e1) e2)
